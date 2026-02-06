@@ -11,7 +11,7 @@ const app = express();
 const httpServer = createServer(app);
 
 const corsLink = [
-    'http://localhost:3000'
+    'http://localhost:5173'
 ];
 
 app.use(cors({
