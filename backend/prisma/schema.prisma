@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Device {
+  id              String         @id @default(uuid())
+  serialNumber    String         @unique
+  name            String         // Nama alat, misal: "Sensor Protokol Basuki Rahmat"
+  status          DeviceStatus   @default(ACTIVE)
+  hardwareVersion String?        // Misal: "ESP8266-V3-SIM800L"
+  batteryLevel    Float?         
+  lastSeen        DateTime       @updatedAt
+  profile         DeviceProfile?
+  location        DeviceLocation?
+  logs            SensorLog[]
+  createdAt       DateTime       @default(now())
+}
+
+model DeviceProfile {
+  id               String   @id @default(uuid())
+  deviceId         String   @unique
+  device           Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  owner            String   @default("Dinas PU Surabaya")
+  installationDate DateTime @default(now())
+  description      String?  @db.Text
+  phoneNumber      String?  // Nomor SIM card di SIM800L untuk remote maintenance
+  maintenanceNote  String?  @db.Text
+}
+
+model DeviceLocation {
+  id          String   @id @default(uuid())
+  deviceId    String   @unique
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  latitude    Float
+  longitude   Float
+  alamat     String   @db.Text
+  kecamatan    String   // Kecamatan (Misal: Tegalsari, Genteng)
+  tanda    String?  // Patokan (Misal: Dekat Tunjungan Plaza)
+}
+
+// Tabel Data Edge Node (Data Transaksional/Time-series)
+model SensorLog {
+  id             String   @id @default(uuid())
+  deviceId       String
+  device         Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  height         Float    
+  waterStatus    String   
+  signalStrength Int?     // Nilai RSSI dari SIM800L (untuk monitor kualitas sinyal)
+  timestamp      DateTime @default(now())
+  @@index([deviceId, timestamp])
+}
+
+enum DeviceStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  REPAIR
+}
+
