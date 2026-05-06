@@ -10,33 +10,32 @@ const app = express();
 
 const httpServer = createServer(app);
 
-const corsLink = [
-    'http://localhost:5173'
-];
+const io = new Server(httpServer, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"]
+    }
+});
+
+app.set('io', io);
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-
-        if (corsLink.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed in CORS'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+    origin: 'http://localhost:5173',
+    credentials: true
 }));
 
 app.use(express.json());
 
-app.use('/app/api/sensor', sensorData);
+io.on("connection", (socket) => {
+    console.log(`Client terhubung: ${socket.id}`);
+    socket.on("disconnect", () => console.log("Client terputus"));
+});
 
+app.use('/app/api/sensor', sensorData);
 app.get('/', (req, res) => {
     res.status(200).send("Server berjalan!");
 });
 
-// Mengecek di console server berjalan di port 4000
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
     console.log(` Server berjalan pada port ${PORT}`);
