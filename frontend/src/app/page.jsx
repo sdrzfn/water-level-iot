@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import Dashboard from '../components/Dashboard';
 import GisMap from '../components/GisMap';
+import HistoryPage from '../components/HistoryPage';
 
 // Inisialisasi socket di luar komponen agar tidak reconnect setiap render
 const socket = io('http://localhost:4000');
@@ -90,10 +91,16 @@ const MainPage = () => {
                                 Dashboard
                             </button>
                             <button
-                                onClick={() => setActiveTab('gis')}
-                                className={`px-4 py-2 rounded-md text-sm font-bold transition ${activeTab === 'gis' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                onClick={() => setActiveTab('gismap')}
+                                className={`px-4 py-2 rounded-md text-sm font-bold transition ${activeTab === 'gismap' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 Peta SIG
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('history')}
+                                className={`px-4 py-2 rounded-md text-sm font-bold transition ${activeTab === 'history' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                Data Historis
                             </button>
                         </div>
                     </div>
@@ -104,9 +111,13 @@ const MainPage = () => {
                 {/* Kirim data sensors hasil fetching sebagai props ke anak komponen */}
                 {activeTab === 'dashboard' ? (
                     <Dashboard sensors={sensors} /> 
-                ) : (
+                ) : activeTab === 'gismap' ? (
                     <div className="space-y-6">
                         <GisMap sensors={sensors} />
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        <HistoryPage sensors={sensors} />
                     </div>
                 )}
             </main>
