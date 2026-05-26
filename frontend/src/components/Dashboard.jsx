@@ -34,7 +34,6 @@ const Dashboard = () => {
           color: getStatusColor(latestLog.waterStatus)
         };
       });
-
       setSensors(formattedData);
       setLoading(false);
     } catch (error) {
@@ -46,7 +45,7 @@ const Dashboard = () => {
     fetchInitialData();
     // Listener socket.io
     socket.on('update-data', (newData) => {
-      console.log("Menerima data real-time:", newData);
+      // console.log("Menerima data real-time:", newData);
 
       setSensors(prevSensors => {
         return prevSensors.map(sensor => {
